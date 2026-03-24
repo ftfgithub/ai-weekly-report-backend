@@ -1,29 +1,31 @@
 import { Request, Response, NextFunction } from 'express'
 import { userService } from '../services/userService'
 
-interface AuthRequest extends Request {
+export interface AuthRequest extends Request {
   user?: any
 }
 
-export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '')
 
     if (!token) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: '未提供认证令牌'
       })
+      return
     }
 
     const decoded = userService.verifyToken(token)
     const user = userService.getUserById(decoded.userId)
 
     if (!user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: '用户不存在'
       })
+      return
     }
 
     req.user = user
@@ -36,20 +38,21 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   }
 }
 
-export const checkUsageLimit = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const checkUsageLimit = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         error: '未认证'
       })
+      return
     }
 
     const canUse = userService.canUseService(req.user)
 
     if (!canUse) {
       const limit = userService.getUsageLimit(req.user)
-      return res.status(429).json({
+      res.status(429).json({
         success: false,
         error: '今日使用次数已达上限',
         data: {
@@ -58,6 +61,7 @@ export const checkUsageLimit = async (req: AuthRequest, res: Response, next: Nex
           resetTime: new Date(req.user.lastResetDate + 24 * 60 * 60 * 1000).toISOString()
         }
       })
+      return
     }
 
     next()
@@ -69,7 +73,7 @@ export const checkUsageLimit = async (req: AuthRequest, res: Response, next: Nex
   }
 }
 
-export const trackUsage = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const trackUsage = async (req: AuthRequest, _res: Response, next: NextFunction): Promise<void> => {
   try {
     if (req.user) {
       await userService.incrementUsage(req.user.id)

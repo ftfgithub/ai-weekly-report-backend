@@ -51,12 +51,12 @@ const limiter = rateLimit({
 
 app.use('/api/', limiter)
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Powered-By', 'AI Weekly Report Generator')
   next()
 })
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({
     success: true,
     message: 'Server is running',

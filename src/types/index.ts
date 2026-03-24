@@ -1,3 +1,5 @@
+import { Request } from 'express'
+
 export interface WeeklyReportInput {
   userName: string
   department: string
@@ -14,6 +16,10 @@ export interface WeeklyReportOutput {
   content: string
   timestamp: number
   model: string
+}
+
+export interface AuthRequest extends Request {
+  user?: any
 }
 
 export interface AIProvider {

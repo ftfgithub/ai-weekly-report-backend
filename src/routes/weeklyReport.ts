@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { weeklyReportService } from '../services/weeklyReportService'
 import { aiService } from '../services/aiService'
 import { authenticate, checkUsageLimit, trackUsage } from '../middleware/auth'
@@ -6,16 +6,17 @@ import type { WeeklyReportInput, AuthRequest } from '../types'
 
 const router = Router()
 
-router.post('/generate', authenticate, checkUsageLimit, trackUsage, async (req: AuthRequest, res) => {
+router.post('/generate', authenticate, checkUsageLimit, trackUsage, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const input: WeeklyReportInput = req.body
 
     const validation = weeklyReportService.validateInput(input)
     if (!validation.valid) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: validation.error
       })
+      return
     }
 
     const provider = req.body.provider || undefined
@@ -34,7 +35,7 @@ router.post('/generate', authenticate, checkUsageLimit, trackUsage, async (req: 
   }
 })
 
-router.get('/providers', (req, res) => {
+router.get('/providers', (_req: Request, res: Response) => {
   try {
     const providers = aiService.getAvailableProviders()
     res.json({
@@ -49,7 +50,7 @@ router.get('/providers', (req, res) => {
   }
 })
 
-router.post('/validate', (req, res) => {
+router.post('/validate', (req: Request, res: Response) => {
   try {
     const input: WeeklyReportInput = req.body
     const validation = weeklyReportService.validateInput(input)

@@ -2,7 +2,7 @@ import type { PaymentPlan, PaymentOrder } from '../types/user'
 
 class PaymentService {
   private orders: Map<string, PaymentOrder> = new Map()
-  private plans: PaymentPlan[]
+  private plans: PaymentPlan[] = []
 
   constructor() {
     this.initializePlans()
@@ -121,10 +121,10 @@ class PaymentService {
     })
 
     const returnUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success`
-    const notifyUrl = `${process.env.API_URL || 'http://localhost:3001'}/api/payment/notify/alipay`
+    const apiUrl = `${process.env.API_URL || 'http://localhost:3001'}/api/payment/notify/alipay`
 
     params.append('return_url', returnUrl)
-    params.append('notify_url', notifyUrl)
+    params.append('notify_url', apiUrl)
 
     const sign = await this.signAlipayParams(params)
     params.append('sign', sign)
@@ -143,19 +143,18 @@ class PaymentService {
       out_trade_no: order.id,
       total_fee: order.amount,
       body: `AI周报生成器 - ${plan.name}`,
-      trade_type: 'NATIVE'
+      trade_type: 'NATIVE',
+      notify_url: `${process.env.API_URL || 'http://localhost:3001'}/api/payment/notify/wechat`
     }
-
-    const notifyUrl = `${process.env.API_URL || 'http://localhost:3001'}/api/payment/notify/wechat`
 
     return `https://api.mch.weixin.qq.com/pay/unifiedorder?${JSON.stringify(params)}`
   }
 
-  private async signAlipayParams(params: URLSearchParams): Promise<string> {
+  private async signAlipayParams(_params: URLSearchParams): Promise<string> {
     return 'mock-signature'
   }
 
-  async handlePaymentNotify(orderId: string, paymentMethod: 'alipay' | 'wechat'): Promise<boolean> {
+  async handlePaymentNotify(orderId: string, _paymentMethod: 'alipay' | 'wechat'): Promise<boolean> {
     const order = this.orders.get(orderId)
 
     if (!order) {

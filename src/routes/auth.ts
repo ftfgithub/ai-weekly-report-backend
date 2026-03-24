@@ -1,32 +1,35 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { userService } from '../services/userService'
 import type { RegisterInput, LoginInput } from '../types/user'
 
 const router = Router()
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: Request, res: Response): Promise<void> => {
   try {
     const input: RegisterInput = req.body
 
     if (!input.email || !input.password || !input.name) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: '请填写完整信息'
       })
+      return
     }
 
     if (!input.email.includes('@')) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: '邮箱格式不正确'
       })
+      return
     }
 
     if (input.password.length < 6) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: '密码长度至少为6位'
       })
+      return
     }
 
     const result = await userService.register(input)
@@ -44,15 +47,16 @@ router.post('/register', async (req, res) => {
   }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const input: LoginInput = req.body
 
     if (!input.email || !input.password) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: '请填写邮箱和密码'
       })
+      return
     }
 
     const result = await userService.login(input)

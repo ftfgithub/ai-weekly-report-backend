@@ -3,6 +3,7 @@ import app from './config/app'
 import weeklyReportRoutes from './routes/weeklyReport'
 import authRoutes from './routes/auth'
 import paymentRoutes from './routes/payment'
+import type { Request, Response, NextFunction } from 'express'
 
 dotenv.config()
 
@@ -12,14 +13,14 @@ app.use('/api/weekly-report', weeklyReportRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/payment', paymentRoutes)
 
-app.use((req, res) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     error: '接口不存在'
   })
 })
 
-app.use((err: Error, req: any, res: any, next: any) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('服务器错误:', err)
   res.status(500).json({
     success: false,
