@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+test-ports.*
+*.log
+.DS_Store
+.vscode
+.idea
